@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXUS SECRET LOUNGE</title>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Pretendard:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 👠 CYBERPUNK LOUNGE THEME 👠 */
+        :root {
+            --bg-dark: #0a000a; /* 아주 어두운 보라색 */
+            --glass: rgba(30, 0, 30, 0.7);
+            --glass-border: 1px solid rgba(255, 0, 100, 0.2);
+            
+            --neon-pink: #ff007f;   /* 메인 컬러: 핫핑크 */
+            --neon-purple: #bd00ff; /* 서브 컬러: 퍼플 */
+            --neon-blue: #00f3ff;   /* 포인트 컬러 */
+            --neon-green: #00ff9d;  /* 수익 컬러 */
+            
+            --text-main: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: 'Pretendard', sans-serif;
+            height: 100dvh; width: 100vw; overflow: hidden; 
+            display: flex; flex-direction: column;
+            
+            /* 관능적인 배경 그라디언트 */
+            background: linear-gradient(135deg, #1a001a, #2e003e, #1a001a);
+            background-size: 400% 400%;
+            animation: breatheBG 10s ease infinite;
+        }
+
+        @keyframes breatheBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* [1] 상단 헤더 */
+        header {
+            height: 45px; 
+            background: var(--glass); 
+            backdrop-filter: blur(10px);
+            border-bottom: var(--glass-border); 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 15px; flex-shrink: 0; z-index: 10;
+        }
+        .seed-info { font-size: 11px; color: var(--neon-pink); font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; }
+        .seed-val { font-size: 16px; font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(255,0,127,0.5); font-family: 'Rajdhani', sans-serif; margin-left:5px; }
+        .pnl-rate { font-size: 12px; font-weight: bold; margin-left: 5px; }
+        .live-price { font-size: 18px; font-weight: 800; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); font-family: 'Rajdhani', sans-serif; }
+
+        /* [2] 시스템 버튼 존 */
+        .system-zone {
+            height: 45px; background: rgba(0,0,0,0.4); border-bottom: var(--glass-border);
+            display: flex; gap: 8px; padding: 5px 15px; align-items: center; flex-shrink: 0;
+        }
+        .sys-btn {
+            flex: 1; height: 32px; border-radius: 6px; border: var(--glass-border);
+            font-weight: bold; font-size: 11px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            color: #fff; background: rgba(255, 0, 127, 0.1); transition: 0.3s;
+        }
+        .sys-btn:hover { background: rgba(255, 0, 127, 0.3); box-shadow: 0 0 10px var(--neon-pink); }
+        
+        #btn-auto.auto-on { 
+            background: linear-gradient(90deg, #ff007f, #bd00ff); border: none; 
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.6); animation: heartbeat 1.5s infinite; 
+        }
+
+        /* [3] 레이디 존 (Lady Zone - 구 Baboon Zone) */
+        #lady-zone {
+            height: 90px; 
+            background: rgba(20, 0, 20, 0.3); 
+            display: flex; justify-content: space-around; align-items: flex-end;
+            padding-bottom: 10px; border-bottom: var(--glass-border);
+            flex-shrink: 0; position: relative;
+        }
+        .lady-wrapper { position: relative; width: 25%; text-align: center; }
+        .lady-face { 
+            font-size: 36px; transition: 0.2s; cursor: pointer; 
+            filter: drop-shadow(0 0 8px rgba(255, 0, 127, 0.6));
+        }
+        .lady-face:active { transform: scale(0.9) rotate(-5deg); }
+        .lady-label { font-size: 10px; color: #ffcae5; font-weight: bold; margin-top: 4px; letter-spacing: -0.5px; }
+        
+        /* 말풍선 (Pink Style) */
+        .speech-bubble {
+            position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%) scale(0);
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple)); 
+            color: #fff; padding: 5px 10px; border-radius: 12px; border-bottom-left-radius: 0;
+            font-size: 11px; font-weight: bold; white-space: nowrap; opacity: 0; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 5px 15px rgba(255,0,127,0.4); pointer-events: none; z-index: 100;
+        }
+        .speaking { transform: translateX(-50%) scale(1); opacity: 1; }
+        
+        /* 10% 수익 시 터지는 이펙트 */
+        @keyframes heartPop { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+        .effect-pop { position: absolute; font-size: 50px; pointer-events: none; animation: heartPop 1s forwards; z-index: 999; }
+
+        /* [4] 차트 */
+        #tv_chart_container { flex: 1; width: 100%; background: #000; min-height: 0; border-bottom: var(--glass-border); }
+
+        /* [5] 채팅방 (시크릿 메신저) */
+        .chat-room {
+            height: 140px; background: rgba(0,0,0,0.8); 
+            padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+            flex-shrink: 0; border-top: 1px solid #333;
+        }
+        .msg { display: flex; align-items: flex-end; gap: 8px; animation: slideUp 0.3s; }
+        .avatar { font-size: 22px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+        .bubble { 
+            padding: 8px 12px; border-radius: 12px; font-size: 12px; max-width: 85%;
+            font-weight: 500; line-height: 1.4; color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        /* 레이디 (AI) 메시지 */
+        .lady-msg .bubble { 
+            background: linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(189, 0, 255, 0.2)); 
+            border: 1px solid var(--neon-pink); 
+            box-shadow: 0 0 8px rgba(255, 0, 127, 0.1);
+            color: #ffcae5;
+        }
+        
+        /* 시스템 메시지 */
+        .sys-msg { justify-content: center; } 
+        .sys-msg .bubble { background: rgba(255, 255, 255, 0.1); border-radius: 20px; font-size: 11px; color: #aaa; }
+
+        /* [6] 컨트롤 버튼 (네온) */
+        .controls {
+            height: 60px; background: rgba(10,0,10,0.95); padding: 5px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px;
+            border-top: var(--glass-border); flex-shrink: 0;
+            padding-bottom: max(5px, env(safe-area-inset-bottom));
+        }
+        .btn {
+            border: none; border-radius: 6px; font-weight: 800; font-size: 11px; 
+            color: #fff; cursor: pointer; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; transition: 0.2s;
+            background: #1a1a1a; position: relative; overflow: hidden;
+        }
+        .btn::after { content:''; position: absolute; width:100%; height:100%; background: linear-gradient(rgba(255,255,255,0.1), transparent); top:0; left:0; pointer-events: none; }
+        .btn:active { transform: scale(0.95); }
+        
+        .btn-l-buy { border: 1px solid var(--neon-green); color: var(--neon-green); box-shadow: 0 0 5px rgba(0,255,157,0.2); }
+        .btn-l-sell { border: 1px solid #333; color: #555; pointer-events: none; }
+        .btn-s-buy { border: 1px solid var(--neon-pink); color: var(--neon-pink); box-shadow: 0 0 5px rgba(255,0,127,0.2); }
+        .btn-s-sell { border: 1px solid #333; color: #555; pointer-events: none; }
+        
+        .active-btn { opacity: 1 !important; pointer-events: auto !important; background: #222 !important; border-color: #fff !important; color: #fff !important; }
+
+        /* [7] 지갑 모달 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 999; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .wallet-card { width: 90%; max-height: 80%; background: #111; border: 1px solid var(--neon-pink); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; }
+        .wallet-header { padding: 15px; background: rgba(255,0,127,0.1); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .wallet-title { font-size: 15px; font-weight: bold; color: var(--neon-pink); }
+        .close-modal { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+        .history-list { flex: 1; overflow-y: auto; padding: 10px; color: #ddd; }
+        .history-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222; font-size: 12px; }
+
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <span class="seed-info">TOTAL EQUITY</span>
+            <div>
+                <span id="balance" class="seed-val">10,000</span>
+                <span id="pnl-rate" class="pnl-rate" style="color:#666;">(0.00%)</span>
+            </div>
+        </div>
+        <div id="price-display" class="live-price">Loading...</div>
+    </header>
+
+    <div class="system-zone">
+        <button id="btn-auto" class="sys-btn" onclick="bot.toggleAuto()">
+            <i class="fas fa-kiss-wink-heart"></i> <span id="auto-text">AI AUTO OFF</span>
+        </button>
+        <button id="btn-wallet" class="sys-btn" onclick="bot.openWallet()">
+            <i class="fas fa-wallet"></i> MY WALLET
+        </button>
+    </div>
+
+    <div id="lady-zone">
+        <div class="lady-wrapper">
+            <div id="msg-1" class="speech-bubble">96,500</div>
+            <div id="face-1" class="lady-face" onclick="bot.action(1)">💃</div>
+            <div class="lady-label">LONG</div>
+        </div>
+        <div class="lady-wrapper">
+            <div id="msg-2" class="speech-bubble">+500</div>
+            <div id="face-2" class="lady-face" onclick="bot.action(2)">💋</div>
+            <div class="lady-label">PROFIT</div>
+        </div>
+        <div class="lady-wrapper">
+            <div id="msg-3" class="speech-bubble">96,500</div>
+            <div id="face-3" class="lady-face" onclick="bot.action(3)">👠</div>
+            <div class="lady-label">SHORT</div>
+        </div>
+        <div class="lady-wrapper">
+            <div id="msg-4" class="speech-bubble">+500</div>
+            <div id="face-4" class="lady-face" onclick="bot.action(4)">💎</div>
+            <div class="lady-label">PROFIT</div>
+        </div>
+    </div>
+
+    <div id="tv_chart_container"></div>
+
+    <div class="chat-room" id="chat-box">
+        <div class="msg sys-msg">
+            <div class="avatar">💖</div>
+            <div class="bubble">오빠 안녕? 시크릿 라운지에 온 걸 환영해! 😘</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="btn-1" class="btn btn-l-buy" onclick="bot.action(1)">💃 L-OPEN</button>
+        <button id="btn-2" class="btn btn-l-sell" onclick="bot.action(2)">💋 L-CLOSE</button>
+        <button id="btn-3" class="btn btn-s-buy" onclick="bot.action(3)">👠 S-OPEN</button>
+        <button id="btn-4" class="btn btn-s-sell" onclick="bot.action(4)">💎 S-CLOSE</button>
+    </div>
+
+    <div id="wallet-modal" class="modal-overlay">
+        <div class="wallet-card">
+            <div class="wallet-header">
+                <div class="wallet-title">💎 SECRET LEDGER</div>
+                <button class="close-modal" onclick="bot.closeWallet()">✕</button>
+            </div>
+            <div id="history-list" class="history-list">
+                <div style="text-align:center; color:#555; padding:20px;">내역이 없어요, 오빠.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new TradingView.widget({
+            "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "1", "timezone": "Asia/Seoul",
+            "theme": "dark", "style": "1", "locale": "kr", "toolbar_bg": "#f1f3f6", "enable_publishing": false,
+            "hide_top_toolbar": true, "container_id": "tv_chart_container",
+            "disabled_features": ["use_localstorage_for_settings"], "enabled_features": ["hide_left_toolbar_by_default"]
+        });
+
+        class SexyBot {
+            constructor() {
+                this.startBalance = 10000;
+                this.balance = 10000;
+                this.position = null; 
+                this.price = 0;
+                this.isAuto = false;
+                this.autoTimer = null;
+                this.history = [];
+                
+                this.fetchPrice();
+                setInterval(() => this.fetchPrice(), 500);
+                setInterval(() => this.randomChatter(), 4000); // 잡담 주기 조절
+            }
+
+            async fetchPrice() {
+                try {
+                    const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+                    const data = await res.json();
+                    this.price = parseFloat(data.price);
+                    this.updateHeader();
+                } catch(e) {}
+            }
+
+            // AI 레이디의 말풍선
+            shout(id, text) {
+                const bubble = document.getElementById(`msg-${id}`);
+                bubble.innerText = text;
+                bubble.classList.add('speaking');
+                setTimeout(() => bubble.classList.remove('speaking'), 2000);
+            }
+
+            // 채팅창 대화
+            talk(text, type = 'lady') {
+                const div = document.createElement('div');
+                div.className = type === 'sys' ? 'msg sys-msg' : 'msg lady-msg';
+                const avatar = type === 'sys' ? '🔔' : '👩‍🎤';
+                div.innerHTML = `<div class="avatar">${avatar}</div><div class="bubble">${text}</div>`;
+                const box = document.getElementById('chat-box');
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
+                if(box.children.length > 50) box.removeChild(box.firstChild);
+            }
+
+            // 10% 이상 수익 터질 때 이펙트
+            popEffect(emoji) {
+                const zone = document.getElementById('lady-zone');
+                const el = document.createElement('div');
+                el.className = 'effect-pop';
+                el.innerText = emoji;
+                el.style.left = (Math.random() * 80 + 10) + '%';
+                el.style.top = (Math.random() * 50 + 20) + '%';
+                zone.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            }
+
+            toggleAuto() {
+                this.isAuto = !this.isAuto;
+                const btn = document.getElementById('btn-auto');
+                const txt = document.getElementById('auto-text');
+
+                if (this.isAuto) {
+                    btn.classList.add('auto-on');
+                    txt.innerText = "AUTO LOVE ON";
+                    this.talk("오빠, 이제 내가 알아서 불려줄게! 믿어봐~ 😘");
+                    this.autoTimer = setInterval(() => this.autoTradeLogic(), 3000);
+                } else {
+                    btn.classList.remove('auto-on');
+                    txt.innerText = "AUTO OFF";
+                    this.talk("치.. 오빠가 직접 하려구? 알겠어. 지켜볼게. 👀");
+                    clearInterval(this.autoTimer);
+                }
+            }
+
+            autoTradeLogic() {
+                if(this.price === 0) return;
+                const r = Math.random();
+                if (this.position) {
+                    if (r > 0.7) { 
+                        const actionId = this.position.type === 'LONG' ? 2 : 4;
+                        this.action(actionId);
+                    }
+                } else {
+                    if (r > 0.6) { 
+                        const type = Math.random() > 0.5 ? 1 : 3;
+                        this.action(type);
+                    }
+                }
+            }
+
+            action(id) {
+                if(this.price === 0) return;
+
+                if(id === 1) { 
+                    if(this.position) return;
+                    this.position = { type: 'LONG', entry: this.price, amount: this.balance };
+                    this.shout(1, "진입! 💖");
+                    this.toggleBtns(true, 'LONG');
+                    if(!this.isAuto) this.talk("자기야, 롱으로 가는거야? 느낌 좋아! 🚀");
+                }
+                else if(id === 2) { 
+                    if(!this.position) return;
+                    this.closePosition(2);
+                }
+                else if(id === 3) { 
+                    if(this.position) return;
+                    this.position = { type: 'SHORT', entry: this.price, amount: this.balance };
+                    this.shout(3, "내려가! 💢");
+                    this.toggleBtns(true, 'SHORT');
+                    if(!this.isAuto) this.talk("오빠 촉 믿어, 숏으로 찍어 누르자! 👠");
+                }
+                else if(id === 4) { 
+                    if(!this.position) return;
+                    this.closePosition(4);
+                }
+            }
+
+            closePosition(btnId) {
+                const diff = (this.price - this.position.entry) / this.position.entry;
+                const pnlRate = this.position.type === 'LONG' ? diff : -diff;
+                const profit = this.position.amount * pnlRate;
+                const roe = pnlRate * 100; // 수익률 %
+                
+                this.balance += profit;
+                const sign = profit > 0 ? "+" : "";
+                
+                // 수익률 10% 이상 대박 터졌을 때 (요청 기능)
+                if(roe >= 10.0) {
+                    this.shout(btnId, `대박! +${Math.floor(profit)}`);
+                    this.talk(`오빠 짱멋져! ${roe.toFixed(2)}%라니... 사랑해요! 팁 주세요잉~ 💖💸`);
+                    // 이펙트 팡팡
+                    for(let i=0; i<5; i++) setTimeout(() => this.popEffect(i%2==0?'💖':'💸'), i*200);
+                } 
+                // 일반 익절
+                else if (profit > 0) {
+                    this.shout(btnId, `익절 +${Math.floor(profit)}`);
+                    this.talk(`잘했어 자기야! ${Math.floor(profit)}불 벌었네? 츄! 💋`);
+                } 
+                // 손절
+                else {
+                    this.shout(btnId, `${Math.floor(profit)}`);
+                    this.talk(`힝... 속상해... ${Math.floor(profit)}불 까였어... 안아줘 😭`);
+                }
+
+                this.addHistory(this.position.type, this.price, profit);
+                this.position = null;
+                this.toggleBtns(false);
+                this.updateHeader();
+            }
+
+            toggleBtns(hasPos, type) {
+                const b1 = document.getElementById('btn-1');
+                const b2 = document.getElementById('btn-2');
+                const b3 = document.getElementById('btn-3');
+                const b4 = document.getElementById('btn-4');
+
+                // 초기화
+                b1.className = "btn btn-l-buy"; 
+                b2.className = "btn btn-l-sell"; 
+                b3.className = "btn btn-s-buy"; 
+                b4.className = "btn btn-s-sell"; 
+
+                if(!hasPos) {
+                    b1.classList.add('active-btn'); b3.classList.add('active-btn');
+                } else {
+                    if(type === 'LONG') b2.classList.add('active-btn');
+                    else b4.classList.add('active-btn');
+                }
+            }
+
+            updateHeader() {
+                const elPrice = document.getElementById('price-display');
+                elPrice.innerText = this.price.toLocaleString(undefined, {minimumFractionDigits: 2});
+                
+                if(this.position) {
+                     const isWin = (this.position.type === 'LONG' && this.price > this.position.entry) || 
+                                  (this.position.type === 'SHORT' && this.price < this.position.entry);
+                     elPrice.style.color = isWin ? 'var(--neon-green)' : 'var(--neon-pink)';
+                } else {
+                    elPrice.style.color = 'var(--neon-blue)';
+                }
+
+                document.getElementById('balance').innerText = Math.floor(this.balance).toLocaleString();
+                
+                const totalPnl = this.balance - this.startBalance;
+                const pnlPercent = (totalPnl / this.startBalance) * 100;
+                const elRate = document.getElementById('pnl-rate');
+                const sign = totalPnl >= 0 ? "+" : "";
+                elRate.innerText = `(${sign}${pnlPercent.toFixed(2)}%)`;
+                
+                if(totalPnl > 0) elRate.style.color = 'var(--neon-green)';
+                else if(totalPnl < 0) elRate.style.color = 'var(--neon-pink)';
+                else elRate.style.color = '#888';
+            }
+
+            randomChatter() {
+                const msgs = [
+                    "오빠, 차트 좀 봐봐. 지금 들어갈 타이밍 아냐? 😏",
+                    "나 심심해... 매매 좀 해줘... 💕",
+                    "오늘 수익률 기대해도 돼? 칵테일 한잔 하게~ 🍸",
+                    "어머, 방금 그 양봉 봤어? 섹시하다... 🔥",
+                    "숏 버튼이 자꾸 날 유혹하네... 👠",
+                    "돈 많이 벌면 나 명품백 사줄거지? 농담~ 😘"
+                ];
+                if(Math.random() > 0.7) this.talk(msgs[Math.floor(Math.random() * msgs.length)]);
+            }
+
+            openWallet() { document.getElementById('wallet-modal').style.display = 'flex'; this.renderHistory(); }
+            closeWallet() { document.getElementById('wallet-modal').style.display = 'none'; }
+
+            addHistory(type, price, profit) {
+                const now = new Date();
+                const timeStr = `${now.getHours()}:${now.getMinutes()}`;
+                this.history.unshift({ time: timeStr, type: type, price: price, profit: profit });
+            }
+
+            renderHistory() {
+                const list = document.getElementById('history-list');
+                if(this.history.length === 0) { list.innerHTML = "<div style='text-align:center;color:#555;padding:20px;'>거래 내역이 없어요 오빠.</div>"; return; }
+                let html = "";
+                this.history.forEach(h => {
+                    const color = h.profit > 0 ? 'var(--neon-green)' : (h.profit < 0 ? 'var(--neon-pink)' : '#fff');
+                    const sign = h.profit > 0 ? '+' : '';
+                    html += `<div class="history-item"><span>${h.time} ${h.type}</span><span style="color:${color};font-weight:bold">${sign}${Math.floor(h.profit)} $</span></div>`;
+                });
+                list.innerHTML = html;
+            }
+        }
+
+        const bot = new SexyBot();
+    </script>
+</body>
+</html>
